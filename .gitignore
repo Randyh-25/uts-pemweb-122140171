@@ -1,0 +1,56 @@
+# abaikan bro
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# runtime logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# environment
+.env
+.env.*.local
+.env.local
+
+# build / output
+dist/
+build/
+out/
+.tmp/
+.cache/
+
+# coverage
+coverage/
+.nyc_output/
+
+# framework caches (Next / Nuxt / Sapper / Parcel)
+.next/
+.nuxt/
+.sapper/
+.parcel-cache/
+
+# uploads / temp
+uploads/
+public/uploads/
+tmp/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# compiled / misc
+*.tsbuildinfo
+*.tgz
+coverage-final.json
