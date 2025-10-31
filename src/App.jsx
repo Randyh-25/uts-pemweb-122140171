@@ -157,13 +157,59 @@ function App() {
     return '';
   };
 
+  const getEffectDensity = (w) => {
+    if (!w) return 60;
+    const main = w.weather?.[0]?.main?.toLowerCase() || '';
+    if (main.includes('thunderstorm')) return 180;
+    if (main.includes('rain') || main.includes('drizzle')) return 160;
+    if (main.includes('snow')) return 140;
+    if (['mist','fog','haze','smoke'].some(k => main.includes(k))) return 80;
+    if (main.includes('cloud')) return 60;
+    if (['dust','sand','ash'].some(k => main.includes(k))) return 140;
+    if (main.includes('tornado')) return 160;
+    return 60;
+  };
+
+  const density = getEffectDensity(weather);
+  const backCount = Math.round(density * 0.6);
+  const frontCount = density - backCount;
+  const isThunder = (weather?.weather?.[0]?.main || '').toLowerCase().includes('thunder');
+
   return (
     <div className={`app ${getWeatherBgClass(weather)}`}>
       {/* Ambient effects layer, rendered above the background and below content */}
       <div className={`effects ${getEffectClass(weather)}`} aria-hidden="true">
-        {Array.from({ length: 80 }).map((_, i) => (
-          <span key={i} style={{ '--i': i }} />
-        ))}
+        <div className="layer back">
+          {Array.from({ length: backCount }).map((_, i) => (
+            <span key={`b-${i}`} style={{ '--i': i }} />
+          ))}
+        </div>
+        <div className="layer front">
+          {Array.from({ length: frontCount }).map((_, i) => (
+            <span key={`f-${i}`} style={{ '--i': i }} />
+          ))}
+        </div>
+        {isThunder && (
+          <div className="bolts" aria-hidden="true">
+            {[0,1,2].map((idx) => (
+              <svg
+                key={idx}
+                className={`lightning lightning-${idx}`}
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <polyline
+                  points="50,0 56,18 44,22 60,38 52,42 70,60 60,64 82,100"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ))}
+          </div>
+        )}
       </div>
       <Header
         toggleUnit={toggleUnit}
