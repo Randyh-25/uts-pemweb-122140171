@@ -76,6 +76,32 @@ Jika sudah dideploy:
 - Data forecast bersumber dari endpoint 5-day/3-hour; jika horizon belum 5 hari penuh, aplikasi menyertakan hari ini agar konsisten 5 item sesuai spesifikasi.
 - Beberapa style menggunakan efek blur dan overlay; pastikan perangkat tidak mengaktifkan prefers-reduced-motion untuk melihat animasi.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center">
+      <b>Clear Weather</b><br>
+      <img src="https://raw.githubusercontent.com/Randyh-25/uts-pemweb-122140171/refs/heads/main/SS/1.png" width="400">
+    </td>
+    <td align="center">
+      <b>Cloudy</b><br>
+      <img src="https://raw.githubusercontent.com/Randyh-25/uts-pemweb-122140171/refs/heads/main/SS/2.png" width="400">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>Rain</b><br>
+      <img src="https://raw.githubusercontent.com/Randyh-25/uts-pemweb-122140171/refs/heads/main/SS/3.png" width="400">
+    </td>
+    <td align="center">
+      <b>Mist</b><br>
+      <img src="https://raw.githubusercontent.com/Randyh-25/uts-pemweb-122140171/refs/heads/main/SS/4.png" width="400">
+    </td>
+  </tr>
+</table>
+
+
 ---
 
 Randy Hendriyawan – 122140171  
