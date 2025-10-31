@@ -1,92 +1,82 @@
-# UTS Pengembangan Aplikasi Web
+# Weather at a Glance (WAAG)
 
-**Nama:** Randy Hendriyawan  
-**NIM:** 122140171  
+Nama: Randy Hendriyawan  
+NIM: 122140171
 
-## 📘 Deskripsi Proyek
-Proyek ini merupakan bagian dari Ujian Tengah Semester (UTS) mata kuliah **Pengembangan Aplikasi Web**.  
-Aplikasi dikembangkan menggunakan **ReactJS** dengan studi kasus yang ditentukan berdasarkan digit terakhir NIM.  
-Fokus utama pengembangan mencakup implementasi **Form**, **Tabel Dinamis**, **CSS Styling**, **Integrasi API**, serta **Deployment** ke **Vercel**.
+Dashboard cuaca berbasis React + Vite yang memanfaatkan OpenWeatherMap API sebagai pemenuhan UTS Pengembangan Aplikasi Web (studi kasus: Weather Dashboard). Aplikasi menampilkan cuaca saat ini, ramalan 5 hari, riwayat pencarian, efek visual dinamis sesuai kondisi cuaca, serta halaman eksplorasi negara berdasarkan cuaca.
 
-## ⚙️ Teknologi yang Digunakan
-- **Framework:** ReactJS (Create React App atau Vite)
-- **Bahasa Pemrograman:** JavaScript (ES6+)
-- **State Management:** React Hooks (`useState`, `useEffect`)
-- **HTTP Client:** Fetch API atau Axios
-- **Styling:** CSS murni (diperbolehkan menggunakan Tailwind, Ant Design, atau Bootstrap)
-- **Deployment Platform:** Vercel
+## ⚙️ Teknologi
+- React 18 + Vite
+- CSS modern + Tailwind directives (utility build)
+- lucide-react (ikon)
+- Fetch API (async/await)
+- LocalStorage (riwayat & cache eksplorasi)
 
-## 📂 Struktur Folder
+## 📂 Struktur Project (ringkas)
 ```
-my-app/
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/
-│   │   ├── Header.jsx
-│   │   ├── SearchForm.jsx
-│   │   ├── DataTable.jsx
-│   │   └── DetailCard.jsx
-│   ├── App.jsx
-│   ├── App.css
-│   └── index.js
+.
+├── index.html
 ├── package.json
-└── README.md
+├── vite.config.ts
+├── tailwind.config.js
+├── src/
+│   ├── App.jsx
+│   ├── index.css
+│   ├── main.tsx
+│   └── components/
+│       ├── Header.jsx
+│       ├── SearchForm.jsx
+│       ├── WeatherCard.jsx
+│       ├── ForecastTable.jsx
+│       ├── HistoryTable.jsx
+│       ├── ExploreByWeather.jsx
+│       └── About.jsx
+└── src/data/capitals.json
 ```
 
-## 🚀 Cara Instalasi dan Menjalankan
-1. Clone repository ini:
-   ```bash
-   git clone https://github.com/username/uts-pemweb-122140171.git
-   ```
-2. Masuk ke direktori project:
-   ```bash
-   cd uts-pemweb-122140171
-   ```
-3. Install dependencies:
+## 🚀 Menjalankan Secara Lokal
+1. Instal dependencies
    ```bash
    npm install
    ```
-4. Jalankan aplikasi:
+2. Siapkan environment variable (lihat bagian Env)
+3. Jalankan dev server
    ```bash
    npm run dev
    ```
-5. Buka browser dan akses:
-   ```
-   http://localhost:5173
-   ```
+4. Buka di browser: http://localhost:5173
 
 ## 🔑 Environment Variables
-Jika API memerlukan API key (misalnya **OpenWeatherMap**), buat file `.env` pada root project:
+Buat file `.env` di root project dengan isi:
 ```
-REACT_APP_API_KEY=your_api_key_here
+VITE_OPENWEATHER_API_KEY=your_openweather_api_key
 ```
-
-Untuk **Vercel Deployment**, tambahkan environment variable di menu:
-**Settings → Environment Variables**
-
-## 🌐 Link Deployment
-Aplikasi telah di-deploy menggunakan **Vercel** dan dapat diakses melalui tautan berikut:
-
-👉 [https://uts-pemweb-122140171.vercel.app](https://uts-pemweb-122140171.vercel.app)
+Catatan: gunakan key OpenWeatherMap yang aktif. Untuk deployment di Vercel, tambahkan variable yang sama di Settings → Environment Variables.
 
 ## 🧩 Fitur Utama
-- Form input dengan validasi HTML5 dan state management.
-- Tabel data dinamis yang menampilkan hasil dari API.
-- Desain responsif menggunakan Flexbox atau Grid.
-- Implementasi modern JavaScript (arrow function, async/await, destructuring).
-- Integrasi API dengan penanganan *loading* dan *error*.
-- Penyimpanan data lokal menggunakan `localStorage`.
-- Deployment React App ke Vercel.
+- Pencarian kota dengan autocomplete populer.
+- Cuaca saat ini: ikon resmi OWM, suhu, kelembapan, angin, waktu lokal.
+- Ramalan 5 hari: selalu menampilkan 5 item, grafik suhu halus dengan area gradien, glow, separator, dan titik non-distorsi (responsive via ResizeObserver).
+- Riwayat pencarian: tersimpan di localStorage, tombol Clear hanya ada di bagian Riwayat (bukan di header).
+- Toggle satuan °C/°F.
+- Explore Countries by Weather: daftar ibu kota dunia, filter berdasarkan kondisi cuaca saat ini; hasil dicache ±10 menit.
+- Efek visual dinamis sesuai kondisi cuaca (Clear rays, Clouds drift, Rain/Drizzle, Snow, Fog/Mist/Haze/Smoke, Thunderstorm dengan kilat SVG).
+- Halaman About menjelaskan fitur dan konfigurasi.
 
-## 📸 Screenshot Aplikasi
+## 🧭 Navigasi Aplikasi
+- Header: Home, Explore, Use my Location, About, Toggle unit.
+- Halaman: Home (default Jakarta), Explore, About.
 
-```
-nyusul
-![Tampilan Dashboard](./screenshot/dashboard.png)
-```
+## 🌐 Link Deployment
+Jika sudah dideploy:
+
+👉 https://uts-pemweb-122140171.vercel.app
+
+## � Catatan Teknis
+- Data forecast bersumber dari endpoint 5-day/3-hour; jika horizon belum 5 hari penuh, aplikasi menyertakan hari ini agar konsisten 5 item sesuai spesifikasi.
+- Beberapa style menggunakan efek blur dan overlay; pastikan perangkat tidak mengaktifkan prefers-reduced-motion untuk melihat animasi.
 
 ---
 
-**Randy Hendriyawan – 122140171**  
+Randy Hendriyawan – 122140171  
 Institut Teknologi Sumatera (ITERA)

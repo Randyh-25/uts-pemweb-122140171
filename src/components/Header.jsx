@@ -1,6 +1,6 @@
-import { Cloud, Home, LocateFixed, Trash2, Globe } from 'lucide-react';
+import { Cloud, Home, LocateFixed, Globe, Info } from 'lucide-react';
 
-const Header = ({ toggleUnit, unit, onHome, onLocate, onClearHistory, onExplore }) => {
+const Header = ({ toggleUnit, unit, onHome, onLocate, onExplore, onAbout }) => {
   return (
     <header className="header">
       <div className="header-content">
@@ -18,8 +18,8 @@ const Header = ({ toggleUnit, unit, onHome, onLocate, onClearHistory, onExplore 
           <button className="icon-btn" title="Use my location" onClick={onLocate}>
             <LocateFixed size={18} />
           </button>
-          <button className="icon-btn" title="Clear search history" onClick={onClearHistory}>
-            <Trash2 size={18} />
+          <button className="icon-btn" title="About this project" onClick={onAbout}>
+            <Info size={18} />
           </button>
           <button className="unit-toggle" onClick={toggleUnit} title="Toggle °C/°F">
             {unit === 'celsius' ? '°C' : '°F'}
