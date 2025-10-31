@@ -30,14 +30,17 @@ function App() {
 
   const saveToHistory = (city) => {
     const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
-    if (!history.includes(city)) {
+    // bandingkan case-insensitive agar tidak duplikat
+    const exists = history.some((c) => String(c).toLowerCase() === String(city).toLowerCase());
+    if (!exists) {
       const newHistory = [city, ...history].slice(0, 10);
       localStorage.setItem('weatherSearchHistory', JSON.stringify(newHistory));
     }
   };
 
   // fetch by city
-  const fetchWeatherData = async (city, unitOverride) => {
+  const fetchWeatherData = async (city, unitOverride, options = {}) => {
+    const { saveHistory = true } = options;
     const units = unitOverride || unit;
     setLoading(true);
     setError(null);
@@ -66,7 +69,7 @@ function App() {
       const forecastData = await forecastResponse.json();
       setForecast(forecastData.list);
 
-      saveToHistory(currentData.name);
+      if (saveHistory) saveToHistory(currentData.name);
     } catch (err) {
       console.error('[fetchWeatherData]', err);
       setError(err.message || 'Failed to fetch weather data');
@@ -78,7 +81,8 @@ function App() {
   };
 
   // fetch by geolocation (lat/lon)
-  const fetchWeatherByCoords = async ({ lat, lon }, unitOverride) => {
+  const fetchWeatherByCoords = async ({ lat, lon }, unitOverride, options = {}) => {
+    const { saveHistory = true } = options;
     const units = unitOverride || unit;
     setLoading(true);
     setError(null);
@@ -101,8 +105,7 @@ function App() {
       const forecastData = await forecastResponse.json();
       setForecast(forecastData.list);
 
-      // pakai nama kota dari API
-      if (currentData?.name) saveToHistory(currentData.name);
+      if (saveHistory && currentData?.name) saveToHistory(currentData.name);
     } catch (err) {
       setError(err.message || 'Failed to fetch weather data');
       setCurrentWeather(null);
@@ -114,7 +117,7 @@ function App() {
 
   const handleSearch = (city) => {
     if (!city?.trim()) return;
-    fetchWeatherData(city.trim(), unit);
+    fetchWeatherData(city.trim(), unit, { saveHistory: true });
   };
 
   const handleUnitChange = (newUnit) => {
@@ -122,9 +125,9 @@ function App() {
     localStorage.setItem('unit', newUnit);
     if (currentWeather) {
       if (lastQuery?.type === 'coords' && lastQuery?.value) {
-        fetchWeatherByCoords(lastQuery.value, newUnit);
+        fetchWeatherByCoords(lastQuery.value, newUnit, { saveHistory: false });
       } else {
-        fetchWeatherData(currentWeather.name, newUnit);
+        fetchWeatherData(currentWeather.name, newUnit, { saveHistory: false });
       }
     }
   };
@@ -137,7 +140,7 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
-        fetchWeatherByCoords({ lat, lon }, unit);
+        fetchWeatherByCoords({ lat, lon }, unit, { saveHistory: true });
       },
       () => setError('Failed to get your location'),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
@@ -147,9 +150,9 @@ function App() {
   const handleRetry = () => {
     if (!lastQuery) return;
     if (lastQuery.type === 'coords') {
-      fetchWeatherByCoords(lastQuery.value, lastQuery.units);
+      fetchWeatherByCoords(lastQuery.value, lastQuery.units, { saveHistory: false });
     } else {
-      fetchWeatherData(lastQuery.value, lastQuery.units);
+      fetchWeatherData(lastQuery.value, lastQuery.units, { saveHistory: false });
     }
   };
 
@@ -162,7 +165,8 @@ function App() {
       'London','New York','Tokyo','Paris','Singapore'
     ];
     const cityToLoad = history[0] || defaultCities[Math.floor(Math.random() * defaultCities.length)];
-    fetchWeatherData(cityToLoad, unit);
+    // initial load tidak menambah history
+    fetchWeatherData(cityToLoad, unit, { saveHistory: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
