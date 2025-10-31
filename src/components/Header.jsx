@@ -6,7 +6,7 @@ const Header = ({ toggleUnit, unit, onHome, onLocate, onClearHistory, onExplore 
       <div className="header-content">
         <button className="logo" onClick={onHome} title="Home (Jakarta)">
           <Cloud size={28} />
-          <span>WWN — Weather Now</span>
+          <span>Weather at a Glance (WAAG)</span>
         </button>
         <div className="header-actions">
           <button className="icon-btn" title="Home (Jakarta)" onClick={onHome}>
