@@ -17,7 +17,7 @@ logs/
 .env.*.local
 .env.local
 
-# build / output
+# build/output
 dist/
 build/
 out/
@@ -28,13 +28,13 @@ out/
 coverage/
 .nyc_output/
 
-# framework caches (Next / Nuxt / Sapper / Parcel)
+# framework caches(Next/Nuxt/Sapper/Parcel)
 .next/
 .nuxt/
 .sapper/
 .parcel-cache/
 
-# uploads / temp
+# uploads/temp
 uploads/
 public/uploads/
 tmp/
@@ -43,14 +43,14 @@ pids/
 *.seed
 *.pid.lock
 
-# editor / OS files
+# editor
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# compiled / misc
+# compiled/misc
 *.tsbuildinfo
 *.tgz
 coverage-final.json
