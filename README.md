@@ -1,5 +1,9 @@
 # Weather at a Glance (WAAG)
 
+<p align="center">
+  <img src="./logo.svg" alt="WAAG Logo" width="140" style="border-radius:16px;" />
+</p>
+
 Nama: Randy Hendriyawan  
 NIM: 122140171
 
@@ -72,7 +76,7 @@ Jika sudah dideploy:
 
 👉 https://uts-pemweb-122140171.vercel.app
 
-## � Catatan Teknis
+## 📝 Catatan Teknis
 - Data forecast bersumber dari endpoint 5-day/3-hour; jika horizon belum 5 hari penuh, aplikasi menyertakan hari ini agar konsisten 5 item sesuai spesifikasi.
 - Beberapa style menggunakan efek blur dan overlay; pastikan perangkat tidak mengaktifkan prefers-reduced-motion untuk melihat animasi.
 
