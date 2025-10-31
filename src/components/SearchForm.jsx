@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, MapPin } from 'lucide-react';
 
-const SearchForm = ({ onSearch, unit, onUnitChange }) => {
+const SearchForm = ({ onSearch, unit, onUnitChange, onUseMyLocation }) => {
   const [city, setCity] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -17,8 +17,8 @@ const SearchForm = ({ onSearch, unit, onUnitChange }) => {
     setCity(value);
 
     if (value.length > 0) {
-      const filtered = popularCities.filter(city =>
-        city.toLowerCase().includes(value.toLowerCase())
+      const filtered = popularCities.filter(c =>
+        c.toLowerCase().includes(value.toLowerCase())
       );
       setSuggestions(filtered);
       setShowSuggestions(true);
@@ -61,6 +61,15 @@ const SearchForm = ({ onSearch, unit, onUnitChange }) => {
           <button type="submit" className="search-button">
             <Search size={20} />
             Search
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={onUseMyLocation}
+            title="Use my current location"
+          >
+            <MapPin size={18} />
+            Use my location
           </button>
         </div>
 

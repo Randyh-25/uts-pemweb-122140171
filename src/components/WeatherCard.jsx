@@ -1,11 +1,11 @@
-import { Cloud, Droplets, Wind, Eye, Gauge, Sunrise, Sunset } from 'lucide-react';
+import { Cloud, Droplets, Wind, Eye, Gauge, Sunrise, Sunset, Navigation2 } from 'lucide-react';
 
 const WeatherCard = ({ weather, unit }) => {
   if (!weather) {
     return null;
   }
 
-  const { main, weather: weatherInfo, wind, visibility, sys, name, dt } = weather;
+  const { main, weather: weatherInfo, wind, visibility, sys, name, dt, timezone } = weather;
   const tempUnit = unit === 'metric' ? '°C' : '°F';
   const speedUnit = unit === 'metric' ? 'm/s' : 'mph';
 
@@ -13,21 +13,26 @@ const WeatherCard = ({ weather, unit }) => {
     return `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
   };
 
+  // sesuaikan ke timezone kota (timezone = offset detik dari UTC)
+  const toLocalDate = (timestamp) => new Date((timestamp + (timezone ?? 0)) * 1000);
+
   const formatTime = (timestamp) => {
-    return new Date(timestamp * 1000).toLocaleTimeString('id-ID', {
+    return toLocalDate(timestamp).toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
   const formatDate = (timestamp) => {
-    return new Date(timestamp * 1000).toLocaleDateString('id-ID', {
+    return toLocalDate(timestamp).toLocaleDateString('id-ID', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
   };
+
+  const windDeg = wind?.deg ?? 0;
 
   return (
     <div className="weather-card">
@@ -71,8 +76,16 @@ const WeatherCard = ({ weather, unit }) => {
         <div className="detail-item">
           <Wind size={24} className="detail-icon" />
           <div className="detail-content">
-            <span className="detail-label">Wind Speed</span>
-            <span className="detail-value">{wind.speed} {speedUnit}</span>
+            <span className="detail-label">Wind</span>
+            <span className="detail-value" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {wind.speed} {speedUnit}
+              <Navigation2
+                size={18}
+                className="detail-icon"
+                style={{ transform: `rotate(${windDeg}deg)` }}
+                title={`Direction ${windDeg}°`}
+              />
+            </span>
           </div>
         </div>
 
