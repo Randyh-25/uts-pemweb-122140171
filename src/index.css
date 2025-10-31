@@ -700,6 +700,67 @@ body {
   transform: translateY(-2px);
 }
 
+/* ---------- Explore Page ---------- */
+.explore {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.explore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.explore-header h2 { font-size: 22px; font-weight: 700; }
+
+.explore-controls { display: flex; align-items: center; gap: 12px; }
+.explore-controls .select { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); }
+.explore-controls select { background: transparent; color: #fff; border: none; outline: none; }
+.explore-controls select option { color: #000; background: #fff; }
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.explore-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 16px;
+  transition: transform .2s ease, background .2s ease;
+}
+.explore-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+.explore-card .top { display:flex; align-items:center; gap:12px; }
+.explore-card .place h4 { font-size: 16px; font-weight: 700; }
+.explore-card .place p { font-size: 13px; color: var(--text-secondary); }
+.explore-card .temp { margin-left: auto; font-size: 28px; font-weight: 700; }
+.explore-card .meta { display:flex; flex-wrap: wrap; gap:8px 16px; margin-top: 10px; color: var(--text-secondary); font-size: 13px; }
+.explore-card .badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 999px; color: #fff; }
+
+.empty { text-align: center; padding: 16px; color: var(--text-secondary); }
+
+@media (max-width: 1024px) {
+  .explore-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .explore-grid { grid-template-columns: 1fr; }
+  .explore-header { flex-wrap: wrap; }
+  .explore-controls { width: 100%; justify-content: space-between; }
+  .explore-controls .select { flex: 1; }
+  .explore-controls select { width: 100%; }
+  .explore-card { padding: 12px; }
+  .explore-card .temp { font-size: 24px; }
+  .explore-card .place h4 { font-size: 15px; }
+}
+
 /* table responsive wrapper */
 .table-responsive {
   width: 100%;

@@ -4,6 +4,7 @@ import SearchForm from './components/SearchForm';
 import WeatherCard from './components/WeatherCard';
 import ForecastTable from './components/ForecastTable';
 import HistoryTable from './components/HistoryTable';
+import ExploreByWeather from './components/ExploreByWeather.jsx';
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
@@ -15,6 +16,7 @@ function App() {
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState('celsius');
   const [history, setHistory] = useState([]);
+  const [page, setPage] = useState('home'); // 'home' | 'explore'
 
   useEffect(() => {
     const savedHistory = localStorage.getItem('weatherHistory');
@@ -214,27 +216,33 @@ function App() {
       <Header
         toggleUnit={toggleUnit}
         unit={unit}
-        onHome={() => fetchWeatherByCity('Jakarta')}
+        onHome={() => { setPage('home'); fetchWeatherByCity('Jakarta'); }}
+        onExplore={() => setPage('explore')}
         onLocate={handleLocate}
         onClearHistory={clearHistory}
       />
 
       <main className="main-content">
-        <SearchForm onSearch={fetchWeatherByCity} currentCity={weather?.name} />
-
-        {loading && <div className="loading">Loading weather data...</div>}
-        {error && <div className="error">{error}</div>}
-
-        {weather && (
+        {page === 'home' && (
           <>
-            <WeatherCard weather={weather} unit={unit} />
-            <ForecastTable forecast={forecast} unit={unit} />
-            <HistoryTable
-              history={history}
-              onCityClick={fetchWeatherByCity}
-              onClear={clearHistory}
-            />
+            <SearchForm onSearch={fetchWeatherByCity} currentCity={weather?.name} />
+            {loading && <div className="loading">Loading weather data...</div>}
+            {error && <div className="error">{error}</div>}
+            {weather && (
+              <>
+                <WeatherCard weather={weather} unit={unit} />
+                <ForecastTable forecast={forecast} unit={unit} />
+                <HistoryTable
+                  history={history}
+                  onCityClick={fetchWeatherByCity}
+                  onClear={clearHistory}
+                />
+              </>
+            )}
           </>
+        )}
+        {page === 'explore' && (
+          <ExploreByWeather unit={unit} />
         )}
       </main>
     </div>

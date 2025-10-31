@@ -20,14 +20,19 @@ const ForecastTable = ({ forecast, unit }) => {
       groups.get(key).push(item);
     }
 
-    // Sort keys ascending, skip today, pick next 5 days
-    const keys = [...groups.keys()].sort((a, b) => {
+    // Sort keys ascending by date key
+    const keysAll = [...groups.keys()].sort((a, b) => {
       const [ay, am, ad] = a.split('-').map(Number);
       const [by, bm, bd] = b.split('-').map(Number);
       return new Date(Date.UTC(ay, am, ad)) - new Date(Date.UTC(by, bm, bd));
-    }).filter((k) => k !== todayKey).slice(0, 5);
+    });
 
-    const result = keys.map((key) => {
+    // Prefer next 5 days ahead (excluding today). If less than 5 exist,
+    // include today to always render 5 rows as per spec.
+    const futureKeys = keysAll.filter((k) => k !== todayKey);
+    const pickKeys = (futureKeys.length >= 5 ? futureKeys : keysAll).slice(0, 5);
+
+    const result = pickKeys.map((key) => {
       const items = groups.get(key);
       // Choose item closest to 12:00
       let best = items[0];
