@@ -24,13 +24,16 @@ function App() {
     }
   };
 
-  const fetchWeatherData = async (city) => {
+  // terima unitOverride, default ke unit saat ini jika tidak diberikan
+  const fetchWeatherData = async (city, unitOverride) => {
+    const units = unitOverride || unit;
+
     setLoading(true);
     setError(null);
 
     try {
       const currentWeatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${unit}&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${units}&appid=${API_KEY}`
       );
 
       if (!currentWeatherResponse.ok) {
@@ -41,7 +44,7 @@ function App() {
       setCurrentWeather(currentData);
 
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${unit}&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${units}&appid=${API_KEY}`
       );
 
       if (!forecastResponse.ok) {
@@ -62,19 +65,30 @@ function App() {
   };
 
   const handleSearch = (city) => {
-    fetchWeatherData(city);
+    fetchWeatherData(city, unit); // pastikan unit yang dipakai konsisten
   };
 
   const handleUnitChange = (newUnit) => {
     setUnit(newUnit);
     if (currentWeather) {
-      fetchWeatherData(currentWeather.name);
+      // refetch dengan unit baru (jangan pakai state lama)
+      fetchWeatherData(currentWeather.name, newUnit);
     }
   };
 
   useEffect(() => {
-    fetchWeatherData('Jakarta');
+    const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
+    const cityToLoad =
+      history[0] || defaultCities[Math.floor(Math.random() * defaultCities.length)];
+
+    fetchWeatherData(cityToLoad, unit);
   }, []);
+
+  const defaultCities = [
+    'Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang',
+    'Makassar', 'Palembang', 'Tangerang', 'Depok', 'Bekasi',
+    'London', 'New York', 'Tokyo', 'Paris', 'Singapore'
+  ];
 
   return (
     <div className="app">
