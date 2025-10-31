@@ -1,21 +1,25 @@
-import { Cloud, Sun, Moon } from 'lucide-react';
+import { Cloud, Home, LocateFixed, Trash2 } from 'lucide-react';
 
-const Header = ({ theme = 'light', onToggleTheme = () => {} }) => {
+const Header = ({ toggleUnit, unit, onHome, onLocate, onClearHistory }) => {
   return (
     <header className="header">
       <div className="header-content">
-        <div className="header-logo">
-          <Cloud size={32} />
-          <h1>Weather Dashboard</h1>
-        </div>
-        <div className="header-row">
-          <p className="header-subtitle">Real-time weather information for cities worldwide</p>
-          <button
-            className="icon-button"
-            onClick={onToggleTheme}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        <button className="logo" onClick={onHome} title="Home (Jakarta)">
+          <Cloud size={28} />
+          <span>WWN — Weather Now</span>
+        </button>
+        <div className="header-actions">
+          <button className="icon-btn" title="Home (Jakarta)" onClick={onHome}>
+            <Home size={18} />
+          </button>
+          <button className="icon-btn" title="Use my location" onClick={onLocate}>
+            <LocateFixed size={18} />
+          </button>
+          <button className="icon-btn" title="Clear search history" onClick={onClearHistory}>
+            <Trash2 size={18} />
+          </button>
+          <button className="unit-toggle" onClick={toggleUnit} title="Toggle °C/°F">
+            {unit === 'celsius' ? '°C' : '°F'}
           </button>
         </div>
       </div>

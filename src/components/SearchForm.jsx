@@ -1,24 +1,20 @@
-import { useState } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin } from 'lucide-react';
 
-const SearchForm = ({ onSearch, unit, onUnitChange, onUseMyLocation }) => {
-  const [city, setCity] = useState('');
+const SearchForm = ({ onSearch, currentCity }) => {
+  const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const popularCities = [
-    'Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang',
-    'Makassar', 'Palembang', 'Tangerang', 'Depok', 'Bekasi',
-    'London', 'New York', 'Tokyo', 'Paris', 'Singapore'
+    'Mumbai', 'Delhi', 'Bangalore', 'Jakarta', 'Singapore',
+    'Tokyo', 'London', 'New York', 'Paris', 'Sydney'
   ];
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setCity(value);
-
-    if (value.length > 0) {
-      const filtered = popularCities.filter(c =>
-        c.toLowerCase().includes(value.toLowerCase())
+  useEffect(() => {
+    if (query.length > 0) {
+      const filtered = popularCities.filter(city =>
+        city.toLowerCase().includes(query.toLowerCase())
       );
       setSuggestions(filtered);
       setShowSuggestions(true);
@@ -26,83 +22,51 @@ const SearchForm = ({ onSearch, unit, onUnitChange, onUseMyLocation }) => {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  };
+  }, [query]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (city.trim()) {
-      onSearch(city);
+    if (query.trim()) {
+      onSearch(query);
+      setQuery('');
       setShowSuggestions(false);
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setCity(suggestion);
-    onSearch(suggestion);
+  const handleSuggestionClick = (city) => {
+    onSearch(city);
+    setQuery('');
     setShowSuggestions(false);
   };
 
   return (
     <div className="search-form-container">
       <form onSubmit={handleSubmit} className="search-form">
-        <div className="search-input-wrapper">
-          <MapPin className="search-icon" size={20} />
-          <input
-            type="text"
-            value={city}
-            onChange={handleInputChange}
-            placeholder="Enter city name..."
-            className="search-input"
-            required
-            minLength={2}
-            maxLength={50}
-            autoComplete="off"
-          />
-          <button type="submit" className="search-button">
-            <Search size={20} />
-            Search
-          </button>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={onUseMyLocation}
-            title="Use my current location"
-          >
-            <MapPin size={18} />
-            Use my location
-          </button>
-        </div>
-
-        {showSuggestions && suggestions.length > 0 && (
-          <ul className="suggestions-list">
-            {suggestions.map((suggestion, index) => (
-              <li
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="suggestion-item"
-              >
-                <MapPin size={16} />
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for city..."
+          className="search-input"
+          required
+          minLength={2}
+        />
+        <button type="submit" className="search-btn">Search</button>
       </form>
-
-      <div className="unit-toggle">
-        <button
-          className={`unit-button ${unit === 'metric' ? 'active' : ''}`}
-          onClick={() => onUnitChange('metric')}
-        >
-          °C
-        </button>
-        <button
-          className={`unit-button ${unit === 'imperial' ? 'active' : ''}`}
-          onClick={() => onUnitChange('imperial')}
-        >
-          °F
-        </button>
-      </div>
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="suggestions">
+          {suggestions.map((city, index) => (
+            <div
+              key={index}
+              className="suggestion-item"
+              onClick={() => handleSuggestionClick(city)}
+            >
+              <MapPin size={16} />
+              <span>{city}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

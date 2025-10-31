@@ -2,257 +2,173 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import SearchForm from './components/SearchForm';
 import WeatherCard from './components/WeatherCard';
-import DataTable from './components/DataTable';
-import SearchHistory from './components/SearchHistory';
-import './App.css';
+import ForecastTable from './components/ForecastTable';
+import HistoryTable from './components/HistoryTable';
+
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 function App() {
-  const [currentWeather, setCurrentWeather] = useState(null);
-  const [forecast, setForecast] = useState([]);
+  const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [unit, setUnit] = useState('celsius');
+  const [history, setHistory] = useState([]);
 
-  // persist unit & theme
-  const [unit, setUnit] = useState(() => localStorage.getItem('unit') || 'metric');
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
-
-  // simpan query terakhir untuk tombol Retry
-  const [lastQuery, setLastQuery] = useState(null);
-
-  const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
-
-  // Tampilkan error jika API key tidak ada
   useEffect(() => {
-    if (!API_KEY) {
-      setError('Missing API key (VITE_OPENWEATHER_API_KEY). Tambahkan di file .env lalu restart dev server.');
+    const savedHistory = localStorage.getItem('weatherHistory');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
     }
-  }, [API_KEY]);
 
-  const saveToHistory = (city) => {
-    const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
-    // bandingkan case-insensitive agar tidak duplikat
-    const exists = history.some((c) => String(c).toLowerCase() === String(city).toLowerCase());
-    if (!exists) {
-      const newHistory = [city, ...history].slice(0, 10);
-      localStorage.setItem('weatherSearchHistory', JSON.stringify(newHistory));
-    }
-  };
+    // default: Jakarta
+    fetchWeatherByCity('Jakarta');
+  }, []);
 
-  // fetch by city
-  const fetchWeatherData = async (city, unitOverride, options = {}) => {
-    const { saveHistory = true } = options;
-    const units = unitOverride || unit;
+  const fetchWeatherByCity = async (city) => {
     setLoading(true);
     setError(null);
-    setLastQuery({ type: 'city', value: city, units });
 
     try {
-      const currentWeatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${API_KEY}`
+      const weatherResponse = await fetch(
+        `${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`
       );
-      if (!currentWeatherResponse.ok) {
-        const msg = currentWeatherResponse.status === 401 ? 'Invalid API key' : 'City not found';
-        throw new Error(msg);
+
+      if (!weatherResponse.ok) {
+        throw new Error('City not found');
       }
 
-      const currentData = await currentWeatherResponse.json();
-      setCurrentWeather(currentData);
+      const weatherData = await weatherResponse.json();
+      setWeather(weatherData);
 
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=${units}&appid=${API_KEY}`
+        `${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`
       );
-      if (!forecastResponse.ok) {
-        const msg = forecastResponse.status === 401 ? 'Invalid API key' : 'Forecast data not available';
-        throw new Error(msg);
+
+      if (forecastResponse.ok) {
+        const forecastData = await forecastResponse.json();
+        setForecast(forecastData);
       }
 
-      const forecastData = await forecastResponse.json();
-      setForecast(forecastData.list);
+      const newHistory = [
+        {
+          city,
+          timestamp: new Date().toISOString()
+        },
+        ...history.filter(item => item.city.toLowerCase() !== city.toLowerCase())
+      ].slice(0, 10);
 
-      if (saveHistory) saveToHistory(currentData.name);
+      setHistory(newHistory);
+      localStorage.setItem('weatherHistory', JSON.stringify(newHistory));
+
     } catch (err) {
-      console.error('[fetchWeatherData]', err);
-      setError(err.message || 'Failed to fetch weather data');
-      setCurrentWeather(null);
-      setForecast([]);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // fetch by geolocation (lat/lon)
-  const fetchWeatherByCoords = async ({ lat, lon }, unitOverride, options = {}) => {
-    const { saveHistory = true } = options;
-    const units = unitOverride || unit;
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('weatherHistory');
+  };
+
+  const fetchWeatherByCoords = async (lat, lon) => {
     setLoading(true);
     setError(null);
-    setLastQuery({ type: 'coords', value: { lat, lon }, units });
-
     try {
-      const currentWeatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`
+      const weatherResponse = await fetch(
+        `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
       );
-      if (!currentWeatherResponse.ok) throw new Error('Location not found');
-
-      const currentData = await currentWeatherResponse.json();
-      setCurrentWeather(currentData);
+      if (!weatherResponse.ok) throw new Error('Location not found');
+      const weatherData = await weatherResponse.json();
+      setWeather(weatherData);
 
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`
+        `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
       );
-      if (!forecastResponse.ok) throw new Error('Forecast data not available');
+      if (forecastResponse.ok) {
+        const forecastData = await forecastResponse.json();
+        setForecast(forecastData);
+      }
 
-      const forecastData = await forecastResponse.json();
-      setForecast(forecastData.list);
-
-      if (saveHistory && currentData?.name) saveToHistory(currentData.name);
+      const city = weatherData.name || 'Current Location';
+      const newHistory = [
+        { city, timestamp: new Date().toISOString() },
+        ...history.filter((item) => item.city.toLowerCase() !== city.toLowerCase()),
+      ].slice(0, 10);
+      setHistory(newHistory);
+      localStorage.setItem('weatherHistory', JSON.stringify(newHistory));
     } catch (err) {
-      setError(err.message || 'Failed to fetch weather data');
-      setCurrentWeather(null);
-      setForecast([]);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (city) => {
-    if (!city?.trim()) return;
-    fetchWeatherData(city.trim(), unit, { saveHistory: true });
-  };
-
-  const handleUnitChange = (newUnit) => {
-    setUnit(newUnit);
-    localStorage.setItem('unit', newUnit);
-    if (currentWeather) {
-      if (lastQuery?.type === 'coords' && lastQuery?.value) {
-        fetchWeatherByCoords(lastQuery.value, newUnit, { saveHistory: false });
-      } else {
-        fetchWeatherData(currentWeather.name, newUnit, { saveHistory: false });
-      }
-    }
-  };
-
-  const handleUseMyLocation = () => {
-    if (!('geolocation' in navigator)) {
-      setError('Geolocation not supported by your browser');
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported');
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude: lat, longitude: lon } = pos.coords;
-        fetchWeatherByCoords({ lat, lon }, unit, { saveHistory: true });
+        const { latitude, longitude } = pos.coords;
+        fetchWeatherByCoords(latitude, longitude);
       },
-      () => setError('Failed to get your location'),
+      (err) => setError(err.message || 'Failed to get location'),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
-  const handleRetry = () => {
-    if (!lastQuery) return;
-    if (lastQuery.type === 'coords') {
-      fetchWeatherByCoords(lastQuery.value, lastQuery.units, { saveHistory: false });
-    } else {
-      fetchWeatherData(lastQuery.value, lastQuery.units, { saveHistory: false });
-    }
+  const toggleUnit = () => {
+    setUnit(prevUnit => prevUnit === 'celsius' ? 'fahrenheit' : 'celsius');
   };
 
-  useEffect(() => {
-    if (!API_KEY) return; // jangan fetch jika API key kosong
-    const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
-    const defaultCities = [
-      'Jakarta','Surabaya','Bandung','Medan','Semarang',
-      'Makassar','Palembang','Tangerang','Depok','Bekasi',
-      'London','New York','Tokyo','Paris','Singapore'
-    ];
-    const cityToLoad = history[0] || defaultCities[Math.floor(Math.random() * defaultCities.length)];
-    // initial load tidak menambah history
-    fetchWeatherData(cityToLoad, unit, { saveHistory: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const getWeatherBgClass = (w) => {
+    if (!w) return 'bg-default';
+    const main = w.weather?.[0]?.main?.toLowerCase() || '';
+    if (main.includes('thunderstorm')) return 'bg-thunderstorm';
+    if (main.includes('drizzle')) return 'bg-drizzle';
+    if (main.includes('rain')) return 'bg-rain';
+    if (main.includes('snow')) return 'bg-snow';
+    if (main.includes('clear')) return 'bg-clear';
+    if (main.includes('cloud')) return 'bg-clouds';
+    if (['mist','fog','haze','smoke','dust','sand','ash','squall','tornado'].some(k => main.includes(k))) {
+      return 'bg-mist';
+    }
+    return 'bg-default';
+  };
 
   return (
-    <div className={`app ${theme === 'dark' ? 'dark' : ''}`}>
+    <div className={`app ${getWeatherBgClass(weather)}`}>
       <Header
-        theme={theme}
-        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+        toggleUnit={toggleUnit}
+        unit={unit}
+        onHome={() => fetchWeatherByCity('Jakarta')}
+        onLocate={handleLocate}
+        onClearHistory={clearHistory}
       />
 
       <main className="main-content">
-        <div className="container">
-          <SearchForm
-            onSearch={handleSearch}
-            unit={unit}
-            onUnitChange={handleUnitChange}
-            onUseMyLocation={handleUseMyLocation}
-          />
+        <SearchForm onSearch={fetchWeatherByCity} currentCity={weather?.name} />
 
-          {loading && (
-            <>
-              <div className="loading-state">
-                <div className="spinner"></div>
-                <p>Loading weather data...</p>
-              </div>
+        {loading && <div className="loading">Loading weather data...</div>}
+        {error && <div className="error">{error}</div>}
 
-              {/* Skeleton untuk kartu cuaca */}
-              <div className="skeleton-card">
-                <div className="skeleton-line w-40"></div>
-                <div className="skeleton-line w-64"></div>
-                <div className="skeleton-row">
-                  <div className="skeleton-box lg"></div>
-                  <div className="skeleton-col">
-                    <div className="skeleton-line w-56"></div>
-                    <div className="skeleton-line w-48"></div>
-                    <div className="skeleton-line w-40"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Skeleton untuk tabel */}
-              <div className="skeleton-table">
-                <div className="skeleton-line w-56"></div>
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="skeleton-row table">
-                    <div className="skeleton-line w-24"></div>
-                    <div className="skeleton-line w-28"></div>
-                    <div className="skeleton-line w-20"></div>
-                    <div className="skeleton-line w-16"></div>
-                    <div className="skeleton-line w-16"></div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {error && (
-            <div className="error-state">
-              <p>{error}</p>
-              <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center' }}>
-                <button className="search-button" onClick={handleRetry}>Retry</button>
-                <button className="secondary-button" onClick={handleUseMyLocation}>
-                  Use my location
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!loading && !error && currentWeather && (
-            <>
-              <WeatherCard weather={currentWeather} unit={unit} />
-              <DataTable forecast={forecast} unit={unit} />
-            </>
-          )}
-
-          <SearchHistory onCityClick={handleSearch} />
-        </div>
+        {weather && (
+          <>
+            <WeatherCard weather={weather} unit={unit} />
+            <ForecastTable forecast={forecast} unit={unit} />
+            <HistoryTable
+              history={history}
+              onCityClick={fetchWeatherByCity}
+              onClear={clearHistory}
+            />
+          </>
+        )}
       </main>
-
-      <footer className="footer">
-        <p>Weather Dashboard - Powered by OpenWeatherMap API</p>
-      </footer>
     </div>
   );
 }
