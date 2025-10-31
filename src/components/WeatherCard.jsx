@@ -5,7 +5,7 @@ const WeatherCard = ({ weather, unit }) => {
 
   const { name, main, weather: weatherData, wind, dt } = weather;
   const { temp, humidity } = main;
-  const { description, main: category } = weatherData[0];
+  const { description, main: category, icon } = weatherData[0];
 
   const temperature = unit === 'celsius' ? temp : (temp * 9/5) + 32;
   const windSpeed = `${Math.round(wind.speed * 3.6)} km/h`; // m/s -> km/h
@@ -53,6 +53,17 @@ const WeatherCard = ({ weather, unit }) => {
         </div>
 
         <div className="temperature-display">
+          {/* Current weather icon from OpenWeatherMap */}
+          {icon && (
+            <img
+              className="weather-icon"
+              src={`https://openweathermap.org/img/wn/${icon}@2x.png`}
+              alt={description}
+              width={84}
+              height={84}
+              loading="lazy"
+            />
+          )}
           <span className="temperature">{Math.round(temperature)}°</span>
         </div>
       </div>

@@ -141,8 +141,30 @@ function App() {
     return 'bg-default';
   };
 
+  const getEffectClass = (w) => {
+    if (!w) return '';
+    const main = w.weather?.[0]?.main?.toLowerCase() || '';
+    if (main.includes('thunderstorm')) return 'effect-thunderstorm';
+    if (main.includes('drizzle')) return 'effect-rain';
+    if (main.includes('rain')) return 'effect-rain';
+    if (main.includes('snow')) return 'effect-snow';
+    if (main.includes('clear')) return 'effect-clear';
+    if (main.includes('cloud')) return 'effect-clouds';
+    if (['mist','fog','haze','smoke'].some(k => main.includes(k))) return 'effect-fog';
+    if (['dust','sand','ash'].some(k => main.includes(k))) return 'effect-dust';
+    if (main.includes('squall')) return 'effect-rain';
+    if (main.includes('tornado')) return 'effect-tornado';
+    return '';
+  };
+
   return (
     <div className={`app ${getWeatherBgClass(weather)}`}>
+      {/* Ambient effects layer, rendered above the background and below content */}
+      <div className={`effects ${getEffectClass(weather)}`} aria-hidden="true">
+        {Array.from({ length: 80 }).map((_, i) => (
+          <span key={i} style={{ '--i': i }} />
+        ))}
+      </div>
       <Header
         toggleUnit={toggleUnit}
         unit={unit}

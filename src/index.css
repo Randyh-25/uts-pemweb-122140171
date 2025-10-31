@@ -43,6 +43,21 @@ body {
   z-index: 1;
 }
 
+/* Animated weather effects layer (sits above the darkening overlay) */
+.effects {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Generic span seed for particle-based effects */
+.effects span {
+  position: absolute;
+  top: -10%;
+}
+
 /* Background per-cuaca (gunakan gambar bebas dari Unsplash Source) */
 .bg-clear { background-image: url('https://res.cloudinary.com/dwfz1iaay/image/upload/v1761921482/Clear_ovgenu.jpg'); }
 .bg-clouds { background-image: url('https://res.cloudinary.com/dwfz1iaay/image/upload/v1761920023/Cloudy_j8kssg.jpg'); }
@@ -127,10 +142,192 @@ body {
 
 .main-content {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 48px;
+}
+
+/* ——— Rain ——— */
+.effect-rain span,
+.effect-thunderstorm span {
+  left: calc(var(--i) * 1%);
+  width: 2px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+  transform: rotate(15deg);
+  animation: raindrop linear infinite;
+  animation-duration: calc(0.7s + (var(--i) * 0.01s));
+  animation-delay: calc(var(--i) * -0.03s);
+}
+
+@keyframes raindrop {
+  0% { transform: translate3d(0, -10%, 0) rotate(15deg); opacity: 0.8; }
+  100% { transform: translate3d(0, 120vh, 0) rotate(15deg); opacity: 0.1; }
+}
+
+/* Lightning flash overlay for thunderstorm */
+.effect-thunderstorm::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 120% at 50% 40%, rgba(255,255,255,0.6), rgba(255,255,255,0) 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: lightning 6s infinite;
+}
+
+@keyframes lightning {
+  0%, 92%, 100% { opacity: 0; }
+  93% { opacity: 0.7; }
+  94% { opacity: 0.05; }
+  95% { opacity: 0.6; }
+  96%, 99% { opacity: 0; }
+}
+
+/* ——— Snow ——— */
+.effect-snow span {
+  left: calc(var(--i) * 1%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 0 8px rgba(255,255,255,0.6);
+  animation: snowfall linear infinite;
+  animation-duration: calc(3.2s + var(--i) * 0.06s);
+  animation-delay: calc(var(--i) * -0.05s);
+}
+
+@keyframes snowfall {
+  0% { transform: translate3d(0, -10%, 0); opacity: 0.9; }
+  100% { transform: translate3d(calc((var(--i) - 40) * 0.25px), 115vh, 0); opacity: 0.9; }
+}
+
+/* ——— Fog ——— */
+.effect-fog::before,
+.effect-fog::after {
+  content: '';
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  height: 45%;
+  border-radius: 50% / 10%;
+  filter: blur(18px);
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+  animation: fogMove 30s linear infinite;
+}
+.effect-fog::before { top: 8%; animation-duration: 38s; }
+.effect-fog::after { bottom: 10%; animation-duration: 46s; }
+
+@keyframes fogMove {
+  0% { transform: translateX(-10%); }
+  50% { transform: translateX(10%); }
+  100% { transform: translateX(-10%); }
+}
+
+/* ——— Clear (sun rays) ——— */
+.effect-clear::before {
+  content: '';
+  position: absolute;
+  width: 120vmax;
+  height: 120vmax;
+  left: 50%;
+  top: -10vmax;
+  transform: translateX(-50%);
+  background: conic-gradient(from 0deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 30%);
+  filter: blur(6px);
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+  animation: rays 18s linear infinite;
+}
+
+@keyframes rays {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* ——— Clouds: slow drifting translucent blobs ——— */
+.effect-clouds::before,
+.effect-clouds::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  width: 140%;
+  height: 60%;
+  left: -20%;
+  background: radial-gradient( circle at 30% 40%, rgba(255,255,255,0.25), rgba(255,255,255,0) 45% ),
+              radial-gradient( circle at 60% 50%, rgba(255,255,255,0.2), rgba(255,255,255,0) 40% ),
+              radial-gradient( circle at 80% 55%, rgba(255,255,255,0.18), rgba(255,255,255,0) 35% );
+  filter: blur(14px);
+  animation: cloudDrift 60s linear infinite;
+}
+.effect-clouds::after { top: 35%; animation-duration: 80s; opacity: 0.7; }
+
+@keyframes cloudDrift {
+  0% { transform: translateX(-8%); }
+  50% { transform: translateX(8%); }
+  100% { transform: translateX(-8%); }
+}
+
+/* ——— Dust/Sand/Ash: side-blowing particles ——— */
+.effect-dust span {
+  bottom: 10%;
+  left: calc(var(--i) * 1%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 224, 178, 0.9);
+  filter: drop-shadow(0 0 2px rgba(255, 200, 140, 0.6));
+  animation: dustBlow linear infinite;
+  animation-duration: calc(4s + var(--i) * 0.06s);
+  animation-delay: calc(var(--i) * -0.04s);
+}
+
+@keyframes dustBlow {
+  0% { transform: translate3d(-10vw, 0, 0); opacity: 0; }
+  10% { opacity: .5; }
+  50% { transform: translate3d(50vw, -10vh, 0); opacity: .6; }
+  100% { transform: translate3d(110vw, -14vh, 0); opacity: 0; }
+}
+
+/* ——— Tornado: swirling debris + faint funnel ——— */
+.effect-tornado::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 8vh;
+  width: 40vmin;
+  height: 60vmin;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 60% at 50% 100%, rgba(255,255,255,0.12), rgba(255,255,255,0) 60%),
+              radial-gradient(30% 40% at 50% 20%, rgba(255,255,255,0.08), rgba(255,255,255,0) 70%);
+  filter: blur(6px);
+  opacity: 0.6;
+  animation: funnelPulse 3.8s ease-in-out infinite;
+}
+
+@keyframes funnelPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.7; }
+}
+
+.effect-tornado span {
+  left: 50%;
+  top: 58%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 8px rgba(255,255,255,0.6);
+  transform-origin: 0 0;
+  animation: swirl 2.8s linear infinite;
+  animation-delay: calc(var(--i) * -0.05s);
+}
+
+@keyframes swirl {
+  from { transform: rotate(0deg) translateX(calc(24px + var(--i) * 0.6px)) translateY(calc(20px - var(--i) * 0.3px)); opacity: .85; }
+  to { transform: rotate(360deg) translateX(calc(24px + var(--i) * 0.6px)) translateY(calc(20px - var(--i) * 0.3px)); opacity: .25; }
 }
 
 .search-form-container {
@@ -304,6 +501,12 @@ body {
   font-weight: 300;
   line-height: 1;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Current weather icon next to the temperature */
+.weather-icon {
+  margin-right: 16px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
 }
 
 .weather-stats {
