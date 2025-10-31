@@ -3,12 +3,24 @@ import { MapPin, Wind, Droplets, Calendar } from 'lucide-react';
 const WeatherCard = ({ weather, unit }) => {
   if (!weather) return null;
 
-  const { name, main, weather: weatherData, wind, dt } = weather;
+  const { name, main, weather: weatherData, wind, dt, sys } = weather;
   const { temp, humidity } = main;
   const { description, main: category, icon } = weatherData[0];
 
   const temperature = unit === 'celsius' ? temp : (temp * 9/5) + 32;
   const windSpeed = `${Math.round(wind.speed * 3.6)} km/h`; // m/s -> km/h
+  const countryCode = sys?.country;
+  let countryName = countryCode || '';
+  try {
+    if (countryCode && typeof Intl !== 'undefined' && Intl.DisplayNames) {
+      // Force English for consistent country naming
+      const dn = new Intl.DisplayNames(['en'], { type: 'region' });
+      countryName = dn.of(countryCode) || countryCode;
+    }
+  } catch (_) {
+    // fallback already set
+  }
+  const locationLabel = countryName ? `${name}, ${countryName}` : name;
 
   const getDate = () => {
     const date = new Date(dt * 1000);
@@ -33,7 +45,7 @@ const WeatherCard = ({ weather, unit }) => {
       <div className="weather-header">
         <div className="location-info">
           <MapPin size={20} />
-          <span className="city-name">{name}</span>
+          <span className="city-name">{locationLabel}</span>
         </div>
         <div className="date-time">
           <Calendar size={16} />
