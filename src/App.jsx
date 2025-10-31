@@ -21,6 +21,13 @@ function App() {
 
   const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
+  // Tampilkan error jika API key tidak ada
+  useEffect(() => {
+    if (!API_KEY) {
+      setError('Missing API key (VITE_OPENWEATHER_API_KEY). Tambahkan di file .env lalu restart dev server.');
+    }
+  }, [API_KEY]);
+
   const saveToHistory = (city) => {
     const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
     if (!history.includes(city)) {
@@ -38,27 +45,30 @@ function App() {
 
     try {
       const currentWeatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-          city
-        )}&units=${units}&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${API_KEY}`
       );
-      if (!currentWeatherResponse.ok) throw new Error('City not found');
+      if (!currentWeatherResponse.ok) {
+        const msg = currentWeatherResponse.status === 401 ? 'Invalid API key' : 'City not found';
+        throw new Error(msg);
+      }
 
       const currentData = await currentWeatherResponse.json();
       setCurrentWeather(currentData);
 
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
-          city
-        )}&units=${units}&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=${units}&appid=${API_KEY}`
       );
-      if (!forecastResponse.ok) throw new Error('Forecast data not available');
+      if (!forecastResponse.ok) {
+        const msg = forecastResponse.status === 401 ? 'Invalid API key' : 'Forecast data not available';
+        throw new Error(msg);
+      }
 
       const forecastData = await forecastResponse.json();
       setForecast(forecastData.list);
 
       saveToHistory(currentData.name);
     } catch (err) {
+      console.error('[fetchWeatherData]', err);
       setError(err.message || 'Failed to fetch weather data');
       setCurrentWeather(null);
       setForecast([]);
@@ -144,11 +154,12 @@ function App() {
   };
 
   useEffect(() => {
+    if (!API_KEY) return; // jangan fetch jika API key kosong
     const history = JSON.parse(localStorage.getItem('weatherSearchHistory') || '[]');
     const defaultCities = [
-      'Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang',
-      'Makassar', 'Palembang', 'Tangerang', 'Depok', 'Bekasi',
-      'London', 'New York', 'Tokyo', 'Paris', 'Singapore'
+      'Jakarta','Surabaya','Bandung','Medan','Semarang',
+      'Makassar','Palembang','Tangerang','Depok','Bekasi',
+      'London','New York','Tokyo','Paris','Singapore'
     ];
     const cityToLoad = history[0] || defaultCities[Math.floor(Math.random() * defaultCities.length)];
     fetchWeatherData(cityToLoad, unit);
